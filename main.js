@@ -11,6 +11,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon: path.join(__dirname, "public", "image4.jpg"), 
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -24,7 +25,7 @@ function createWindow() {
   if (isDev) {
     // Load from Vite dev server
     win.loadURL("http://localhost:5173");
-    win.webContents.openDevTools();
+   // win.webContents.openDevTools();
   } else {
     // Load from built files
     win.loadFile(path.join(__dirname, "dist", "index.html"));
