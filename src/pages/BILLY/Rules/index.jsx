@@ -1,10 +1,37 @@
-"use client";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Rules() {
+  const navigate = useNavigate();
   return (
-<main className="min-h-screen py-2"
-      style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}>
-  <div className="w-full max-w-4xl p-8 rounded-lg shadow-md border mx-auto">
+    <main
+      className="min-h-screen py-2"
+      style={{
+        backgroundColor: "var(--background)",
+        color: "var(--foreground)",
+      }}
+    >
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Home Page</h1>
+
+        {/* Go to some route */}
+        <button
+          onClick={() => navigate("/")}
+          className="px-4 py-2 bg-blue-600 text-white rounded mr-2"
+        >
+          Go to Home
+        </button>
+
+        {/* Go back to previous page */}
+        <button
+          onClick={() => navigate(-1)}
+          className="px-4 py-2 bg-gray-600 text-white rounded"
+        >
+          Go Back
+        </button>
+      </div>
+
+      <div className="w-full max-w-4xl p-8 rounded-lg shadow-md border mx-auto">
         <h1 className="text-3xl font-extrabold text-center mb-4">
           📖 Les règles
         </h1>
