@@ -9,7 +9,6 @@ const FragmentList = lazy(() => import("./pages/BILLY/fragmentlist"));
 const OtherList = lazy(() => import("./pages/BILLY/otherlist"));
 const IllustrationList = lazy(() => import("./pages/BILLY/illustrationlist"));
 
-import "./App.css";
 
 function App() {
   return (
