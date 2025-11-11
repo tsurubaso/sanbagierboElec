@@ -20,6 +20,7 @@ const Home = () => {
   const routes = [
     { label: "Rules", path: "/BILLY/Rules" },
     { label: "Illustrations", path: "/BILLY/illustrationlist" },
+    { label: "drafts", path: "/BILLY/draftlist" },
   ];
   const handleClick = (path) => {
     navigate(path);
