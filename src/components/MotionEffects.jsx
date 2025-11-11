@@ -187,7 +187,7 @@ const HeroSection = ({
       transition={{ duration, ease: "easeOut" }}
       whileHover={hover ? { scale: 1.05 } : {}}
     >
-      <img src={image} alt={text} fill className="object-cover" priority />
+      <img src={image} alt={text} className="object-cover" />
       <motion.div
         className="absolute inset-0 flex items-center justify-center"
         whileHover={hover ? { y: -10 } : {}}

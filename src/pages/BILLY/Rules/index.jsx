@@ -13,13 +13,6 @@ export default function Rules() {
     >
       <div className="p-6">
 
-        {/* Go to some route */}
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-red-600 text-white rounded mr-2"
-        >
-          Go to Home
-        </button>
 
         {/* Go back to previous page */}
         <button

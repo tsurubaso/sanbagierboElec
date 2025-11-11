@@ -8,15 +8,6 @@ export default function NotFoundIllustrations() {
   return (
     <div className="flex flex-col items-center justify-center h-screen text-center px-4">
             <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">Home Page</h1>
-
-        {/* Go to some route */}
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-blue-600 text-white rounded mr-2"
-        >
-          Go to Home
-        </button>
 
         {/* Go back to previous page */}
         <button
