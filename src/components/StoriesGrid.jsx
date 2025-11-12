@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "@/components/SearchBar.jsx"; // ton composant Search séparé
 import { getBooksData } from "@/services/getBooksData.jsx";
+import ThemeToggle from "@/components/ThemeToggle";
 export default function StoriesGrid({
   status,
   basePath,
@@ -35,6 +36,8 @@ useEffect(() => {
 
   return (
     <div className="relative min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+         {/* Theme toggle button */}
+      <ThemeToggle />
       <div className="py-12 px-6 max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-2 tracking-tight">
