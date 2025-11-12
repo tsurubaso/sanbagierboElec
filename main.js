@@ -1,9 +1,8 @@
-// main.js
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Convertir __dirname pour ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -11,7 +10,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    icon: path.join(__dirname, "public", "image4.jpg"), 
+    icon: path.join(__dirname, "public", "image4.jpg"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -19,19 +18,25 @@ function createWindow() {
     },
   });
 
-  // Check if we're in development
-  const isDev = process.argv.includes('--dev') || process.env.NODE_ENV === 'development';
-  
+  const isDev = process.argv.includes("--dev") || process.env.NODE_ENV === "development";
+
   if (isDev) {
-    // Load from Vite dev server
     win.loadURL("http://localhost:5173");
-   // win.webContents.openDevTools();
   } else {
-    // Load from built files
     win.loadFile(path.join(__dirname, "dist", "index.html"));
   }
 }
 
+ipcMain.handle("read-books-json", async () => {
+  const filePath = path.join(__dirname,"public", "stories.json");
+  try {
+    const data = fs.readFileSync(filePath, "utf8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("Erreur lors de la lecture du fichier JSON:", error);
+    throw error;
+  }
+});
 
 app.whenReady().then(createWindow);
 

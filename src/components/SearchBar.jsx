@@ -1,4 +1,3 @@
-"use client";
 
 export default function SearchBar({ value, onChange, placeholder = "🔍 Rechercher..." }) {
   return (

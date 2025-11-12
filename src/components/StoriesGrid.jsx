@@ -1,8 +1,7 @@
-"use client";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import SearchBar from "@/components/SearchBar";
-
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import SearchBar from "@/components/SearchBar.jsx"; // ton composant Search séparé
+import { getBooksData } from "@/services/getBooksData.jsx";
 export default function StoriesGrid({
   status,
   basePath,
@@ -10,23 +9,29 @@ export default function StoriesGrid({
 }) {
   const [stories, setStories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchStories = async () => {
-      try {
-        // 🔹 Appel GitHub API via ton API interne (Server-side)
-        const res = await fetch(`/api/github/books?status=${status}`);
-        const data = await res.json();
-        setStories(data);
-      } catch (error) {
-        console.error("Erreur lors du chargement des stories :", error);
-      }
-    };
-    fetchStories();
-  }, [status]);
+useEffect(() => {
+  const fetchStories = async () => {
+    try {
+      const data = await getBooksData();
+      setStories(data.filter((s) => s.status === status));
+    } catch (error) {
+      console.error("Erreur lors du chargement des stories :", error);
+    }
+  };
+  fetchStories();
+}, [status]);
+
+  // 🔍 Filtrage par recherche
   const filteredStories = stories.filter((story) =>
     story.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // 🔗 Navigation interne
+  const handleClick = (story) => {
+    navigate(`/${basePath}/${status}list/${story.link}/reader`);
+  };
 
   return (
     <div className="relative min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -37,7 +42,7 @@ export default function StoriesGrid({
           </h1>
           <p className="opacity-80 max-w-xl mx-auto">{textDePresentation}</p>
 
-          {/* Search bar */}
+          {/* 🔍 Barre de recherche */}
           <SearchBar
             placeholder="Rechercher une story..."
             value={searchQuery}
@@ -48,26 +53,21 @@ export default function StoriesGrid({
         {filteredStories.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {filteredStories.map((story) => (
-              <Link
+              <div
                 key={story.id}
-                href={`/${basePath}/${status}list/${story.link}/reader`}
-                passHref
+                onClick={() => handleClick(story)}
+                className="rounded-2xl p-5 border transition-transform cursor-pointer hover:-translate-y-1 shadow-lg hover:shadow-xl"
+                style={{
+                  backgroundColor: "var(--card-background)",
+                  borderColor: "var(--border-color)",
+                }}
               >
-                <div
-                  className="rounded-2xl p-5 border transition-transform cursor-pointer
-                    hover:-translate-y-1 shadow-lg hover:shadow-xl"
-                  style={{
-                    backgroundColor: "var(--card-background)",
-                    borderColor: "var(--border-color)",
-                  }}
-                >
-                  <h3 className="text-xl font-semibold">{story.title}</h3>
-                  <p className="mt-2 opacity-80 line-clamp-3">
-                    {story.description}
-                  </p>
-                  <p className="text-sm mt-4 italic opacity-60">{story.type}</p>
-                </div>
-              </Link>
+                <h3 className="text-xl font-semibold">{story.title}</h3>
+                <p className="mt-2 opacity-80 line-clamp-3">
+                  {story.description}
+                </p>
+                <p className="text-sm mt-4 italic opacity-60">{story.type}</p>
+              </div>
             ))}
           </div>
         ) : (
