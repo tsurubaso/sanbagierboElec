@@ -13,7 +13,9 @@
     "framer-motion": "^12.23.24",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.5"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.9.5",
+    "rehype-raw": "^7.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

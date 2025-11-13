@@ -26,7 +26,7 @@ function createWindow() {
     win.loadFile(path.join(__dirname, "dist", "index.html"));
   }
 }
-
+// IPC pour lire le fichier mockup stories.json
 ipcMain.handle("read-books-json", async () => {
   const filePath = path.join(__dirname,"public", "stories.json");
   try {
@@ -35,6 +35,18 @@ ipcMain.handle("read-books-json", async () => {
   } catch (error) {
     console.error("Erreur lors de la lecture du fichier JSON:", error);
     throw error;
+  }
+});
+
+// IPC pour lire un fichier Markdown
+ipcMain.handle("read-markdown", async (event, link) => {
+  try {
+    const filePath = path.join(__dirname,"public", "books", `${link}.md`);
+    const content = fs.readFileSync(filePath, "utf8");
+    return content.replace(/^---[\s\S]+?---\s*/, ""); // strip frontmatter
+  } catch (err) {
+    console.error("Erreur lecture Markdown:", err);
+    throw err;
   }
 });
 

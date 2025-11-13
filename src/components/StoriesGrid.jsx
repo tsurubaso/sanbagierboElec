@@ -6,7 +6,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 export default function StoriesGrid({
   status,
   basePath,
-  textDePresentation = "Fragments of stories or between story and draft",
+  textDePresentation,
 }) {
   const [stories, setStories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
