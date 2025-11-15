@@ -1,8 +1,9 @@
 "use client"; 
 
 import { useState } from "react";
-import { SessionProvider } from "next-auth/react";
-import { usePathname } from "next/navigation"
+
+import { useLocation } from "react-router-dom";
+
 import ThemeToggle from "./ThemeToggle";
 import LeftSidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
@@ -21,7 +22,8 @@ export default function ClientWrapper({
   const [showTop, setShowTop] = useState(true);
   const [showFooter, setShowFooter] = useState(true);
 
- const pathname = usePathname()
+ const location = useLocation();
+const pathname = location.pathname;
 
   // Exemple: "/BILLY/draftlist/reader" → ["", "BILLY", "draftlist", "reader"]
   const [, person] = pathname.split("/")
@@ -39,7 +41,7 @@ export default function ClientWrapper({
   ]
 
   return (
-    <SessionProvider>
+    <>
       <ThemeToggle />
       <div className="flex flex-col min-h-screen">
         {showTop && (
@@ -63,6 +65,6 @@ export default function ClientWrapper({
 
         {showFooter && <Footer />}
       </div>
-    </SessionProvider>
+    </>
   );
 }

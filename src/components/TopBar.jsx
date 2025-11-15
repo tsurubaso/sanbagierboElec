@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-
+import { Link } from "react-router-dom";
 
 export default function TopBar({ onToggleLeft, onToggleRight, navItems = [] }) {
   const [visible, setVisible] = useState(false);
@@ -32,7 +31,7 @@ export default function TopBar({ onToggleLeft, onToggleRight, navItems = [] }) {
               navItems.map((item) => (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  to={item.href}
                   className="px-3 py-1 bg-gray-600 rounded hover:bg-gray-500 text-sm"
                 >
                   {item.label}
