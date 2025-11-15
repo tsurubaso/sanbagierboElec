@@ -22,13 +22,13 @@ function createWindow() {
       contextIsolation: true,
     },
   });
-
+console.log("BrowserWindow created:", mainWindow);
   const isDev = process.argv.includes("--dev");
 
   if (isDev) {
-    win.loadURL("http://localhost:5173");
+    mainWindow.loadURL("http://localhost:5173");
   } else {
-    win.loadFile(path.join(__dirname, "dist", "index.html"));
+    mainWindow.loadFile(path.join(__dirname, "dist", "index.html"));
   }
 }
 
@@ -152,7 +152,10 @@ app.on("open-url", async (event, url) => {
   }
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  console.log("Electron app ready");
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
