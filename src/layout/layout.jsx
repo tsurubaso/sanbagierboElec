@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import ClientWrapper from "@/components/ClientWrapper";
 import DictionarySidebarSimple from "@/components/DicoSimplePourSidebare";
 import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
-import GithubSidebar from "@/components/GitHubSideBar";
+//import GithubSidebar from "@/components/GitHubSideBar";
 
 
 export default function PersonLayout({ children }) {
@@ -61,7 +61,7 @@ export default function PersonLayout({ children }) {
     return (
       <ClientWrapper
        // navItemsTop={navItemsTop}
-        rightSidebarContent={<GithubSidebar />}
+        rightSidebarContent={<h1>Tata</h1>}//{<GithubSidebar />}
       >
         {children}
       </ClientWrapper>
@@ -72,7 +72,7 @@ export default function PersonLayout({ children }) {
     return (
       <ClientWrapper
        // navItemsTop={navItemsTop}
-        rightSidebarContent={<GithubSidebar />}
+        rightSidebarContent={<h1>Tata</h1>}//{<GithubSidebar />}
         showRightDefault={false}
       >
         {children}

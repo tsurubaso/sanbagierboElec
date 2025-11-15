@@ -12,13 +12,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("read-markdown-editing", filePath),
   writeMarkdown: (filePath, content) =>
     ipcRenderer.invoke("write-markdown", { filePath, content }),
-  githubLogin: () => ipcRenderer.invoke("github-login"),
-  githubSession: () => ipcRenderer.invoke("github-session"),
-  githubLogout: () => ipcRenderer.invoke("github-logout"),
+ // githubLogin: () => ipcRenderer.invoke("github-login"),
+  //githubSession: () => ipcRenderer.invoke("github-session"),
+ // githubLogout: () => ipcRenderer.invoke("github-logout"),
    //retourne une fonction de nettoyage
-  onAuthSuccess: (callback) => {
-    ipcRenderer.on("auth-success", callback);
+  //onAuthSuccess: (callback) => {ipcRenderer.on("auth-success", callback);
     // Retourne la fonction pour désinscrire le listener
-    return () => ipcRenderer.removeListener("auth-success", callback);
-  },
+   // return () => ipcRenderer.removeListener("auth-success", callback);},
 });

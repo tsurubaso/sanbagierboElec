@@ -1,9 +1,10 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import 'dotenv/config';
+import { app, BrowserWindow, ipcMain,  } from "electron";//shell
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import Store from "electron-store";
-import axios from "axios";
+//import axios from "axios";
 
 const store = new Store();
 
@@ -38,8 +39,8 @@ function createWindow() {
   });
 }
 
-app.setAsDefaultProtocolClient("sanbagierboelec");
-
+//app.setAsDefaultProtocolClient("sanbagierboelec");
+/*
 async function exchangeCodeForToken(code) {
   const client_id = process.env.GITHUB_CLIENT_ID;
   const client_secret = process.env.GITHUB_CLIENT_SECRET;
@@ -58,7 +59,7 @@ async function exchangeCodeForToken(code) {
 
   return res.data.access_token;
 }
-
+*/
 // IPC pour lire le fichier mockup stories.json
 ipcMain.handle("read-books-json", async () => {
   const filePath = path.join(__dirname, "public", "stories.json");
@@ -112,7 +113,7 @@ ipcMain.handle("write-markdown", async (event, args) => {
     throw err;
   }
 });
-
+/*
 // Lance login GitHub
 ipcMain.handle("github-login", async () => {
   const client_id = process.env.GITHUB_CLIENT_ID;
@@ -124,18 +125,20 @@ ipcMain.handle("github-login", async () => {
 
   shell.openExternal(authUrl);
 });
-
+*/
+/*
 // Récupère la session si présente
 ipcMain.handle("github-session", () => {
   return store.get("github_token", null);
 });
-
+*/
+/*
 // Logout
 ipcMain.handle("github-logout", () => {
   store.delete("github_token");
   return true;
 });
-
+*/
 app.on("open-url", async (event, url) => {
   event.preventDefault();
 
