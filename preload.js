@@ -15,5 +15,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   githubLogin: () => ipcRenderer.invoke("github-login"),
   githubSession: () => ipcRenderer.invoke("github-session"),
   githubLogout: () => ipcRenderer.invoke("github-logout"),
-  onAuthSuccess: (cb) => ipcRenderer.on("auth-success", cb),
+   //retourne une fonction de nettoyage
+  onAuthSuccess: (callback) => {
+    ipcRenderer.on("auth-success", callback);
+    // Retourne la fonction pour désinscrire le listener
+    return () => ipcRenderer.removeListener("auth-success", callback);
+  },
 });
