@@ -7,7 +7,6 @@ const Rules = lazy(() => import("@/pages/Rules"));
 const IllustrationList = lazy(() => import("@/pages/illustrationlist"));
 const Reader = lazy(() => import("@/pages/Reader"));
 const Editor = lazy(() => import("@/pages/Editor"));
-const Merger = lazy(() => import("@/pages/Merger"));
 const GridPage = lazy(() => import("@/pages/GridPage"));
 
 function App() {
@@ -32,9 +31,6 @@ function App() {
 
           {/* ✏️ Editor */}
           <Route path="/:person/:statuslist/:link/editor" element={<Editor />} />
-
-          {/* 🧩 Merger */}
-          <Route path="/:person/:statuslist/:link/merger" element={<Merger />} />
 
           {/* ⚠️ Fallback */}
           <Route path="*" element={<div>Page non trouvée</div>} />

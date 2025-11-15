@@ -2,7 +2,10 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  // tes fonctions ici
+  //  fonctions
   readBooksJson: () => ipcRenderer.invoke("read-books-json"),
-  readMarkdown: (link) => ipcRenderer.invoke("read-markdown", link),
+  readMarkdown: (filePath) => ipcRenderer.invoke("read-markdown", filePath),
+  readMarkdownEditing: (filePath) => ipcRenderer.invoke("read-markdown-editing", filePath),
+  writeMarkdown: (filePath, content) =>
+    ipcRenderer.invoke("write-markdown", { filePath, content }),
 });

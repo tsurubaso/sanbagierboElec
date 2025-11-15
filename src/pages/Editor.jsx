@@ -1,10 +1,9 @@
-"use client";
-import { use } from "react";
-import BookEditor from "@/components/BookEditor";
+// src/pages/Editor.jsx
+import { useParams } from "react-router-dom";
+import BookEditor from "@/components/BookEditor.jsx";
 
-export default function Page({ params, searchParams }) {
-  const book = use(params).link;
-  const branch = use(searchParams)?.branch || "master";
+export default function EditorPage() {
+  const { link } = useParams(); // filename without .md
 
-  return <BookEditor book={book} initialBranch={branch} />;
-}
+  return <BookEditor book={link} />;
+}   
