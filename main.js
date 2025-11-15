@@ -1,13 +1,18 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import Store from "electron-store";
+import axios from "axios";
+
+const store = new Store();
+let mainWindow = null;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 function createWindow() {
-  const win = new BrowserWindow({
+ mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     icon: path.join(__dirname, "public", "image4.jpg"),
@@ -18,8 +23,7 @@ function createWindow() {
     },
   });
 
-  const isDev =
-    process.argv.includes("--dev") || process.env.NODE_ENV === "development";
+  const isDev = process.argv.includes("--dev");
 
   if (isDev) {
     win.loadURL("http://localhost:5173");
@@ -27,6 +31,29 @@ function createWindow() {
     win.loadFile(path.join(__dirname, "dist", "index.html"));
   }
 }
+
+app.setAsDefaultProtocolClient("sanbagierboelec");
+
+async function exchangeCodeForToken(code) {
+  const client_id = process.env.GITHUB_CLIENT_ID;
+  const client_secret = process.env.GITHUB_CLIENT_SECRET;
+
+  const res = await axios.post(
+    "https://github.com/login/oauth/access_token",
+    {
+      client_id,
+      client_secret,
+      code,
+    },
+    { headers: { Accept: "application/json" } }
+  );
+
+  if (!res.data.access_token) throw new Error("GitHub returned no token");
+
+  return res.data.access_token;
+}
+
+
 // IPC pour lire le fichier mockup stories.json
 ipcMain.handle("read-books-json", async () => {
   const filePath = path.join(__dirname, "public", "stories.json");
@@ -78,6 +105,50 @@ ipcMain.handle("write-markdown", async (event, args) => {
   } catch (err) {
     console.error("Erreur écriture Markdown:", err);
     throw err;
+  }
+});
+
+// Lance login GitHub
+ipcMain.handle("github-login", async () => {
+  const client_id = process.env.GITHUB_CLIENT_ID;
+  const authUrl = `https://github.com/login/oauth/authorize` +
+    `?client_id=${client_id}` +
+    `&redirect_uri=sanbagierboelec://auth` +
+    `&scope=read:user`;
+
+  shell.openExternal(authUrl);
+});
+
+// Récupère la session si présente
+ipcMain.handle("github-session", () => {
+  return store.get("github_token", null);
+});
+
+// Logout
+ipcMain.handle("github-logout", () => {
+  store.delete("github_token");
+  return true;
+});
+
+
+app.on("open-url", async (event, url) => {
+  event.preventDefault();
+
+  const code = new URL(url).searchParams.get("code");
+  if (!code) return;
+
+  try {
+    const token = await exchangeCodeForToken(code);
+
+    // sauvegarde localement
+    store.set("github_token", token);
+
+    // prévenir le renderer
+    if (mainWindow) {
+      mainWindow.webContents.send("auth-success", token);
+    }
+  } catch (err) {
+    console.error("OAuth failed:", err);
   }
 });
 

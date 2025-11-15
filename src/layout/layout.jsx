@@ -1,16 +1,14 @@
-"use client";
 
+import { useLocation } from "react-router-dom";
 import ClientWrapper from "@/components/ClientWrapper";
 import DictionarySidebarSimple from "@/components/DicoSimplePourSidebare";
 import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
 import GithubSidebar from "@/components/GitHubSideBar";
-import { usePathname } from "next/navigation";
+
 
 export default function PersonLayout({ children }) {
-  const pathname = usePathname();
-
-    // Exemple : "/BILLY/draftlist/reader" → ["", "BILLY", "draftlist", "reader"]
-  const [, person] = pathname.split("/");
+   const location = useLocation();
+  const pathname = location.pathname;
 
   // Catégories principales
   const isDraft = pathname.includes("draftlist");
@@ -23,15 +21,14 @@ export default function PersonLayout({ children }) {
   // Modes
   const isReader = pathname.includes("/reader");
   const isEditor = pathname.includes("/editor");
-  const isMerger = pathname.includes("/merger");
+
 
   // Base path
-  const basePath = pathname.replace(/\/(reader|editor|merger)$/, "");
+  const basePath = pathname.replace(/\/(reader|editor|creator)$/, "");
 
   const navItemsTop = [
     { href: `${basePath}/reader`, label: "📖 Reader" },
     { href: `${basePath}/editor`, label: "✏️ Editor" },
-    { href: `${basePath}/merger`, label: "🧩 Merger" },
   ];
 
   // === PRIORITÉ AUX MODES ===
@@ -39,7 +36,6 @@ export default function PersonLayout({ children }) {
     return (
       <ClientWrapper
         navItemsTop={navItemsTop}
-        //rightSidebarDescription={<p>🧾 Mode Lecture</p>}
         rightSidebarContent={<DictionarySidebarSimple />}
         showRightDefault={true}
       >
@@ -48,7 +44,7 @@ export default function PersonLayout({ children }) {
     );
   }
 
-  if (isEditor || isMerger) {
+  if (isEditor) {
     return (
       <ClientWrapper
         navItemsTop={navItemsTop}
