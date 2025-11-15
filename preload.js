@@ -1,7 +1,10 @@
 // preload.js - Change to CommonJS
 const { contextBridge, ipcRenderer } = require("electron");
 
+
+console.log("preload loaded");
 contextBridge.exposeInMainWorld("electronAPI", {
+  
   //  fonctions
   readBooksJson: () => ipcRenderer.invoke("read-books-json"),
   readMarkdown: (filePath) => ipcRenderer.invoke("read-markdown", filePath),

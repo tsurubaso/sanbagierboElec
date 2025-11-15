@@ -5,7 +5,10 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
+    "vite": "vite",
+    "electron:dev": "npx electron . --dev",
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 --timeout 600000 && electron . --dev\"",
+    "dev2": "concurrently \"npm run vite\" \"npm run electron:dev\"",
     "start": "electron .",
     "build": "vite build && electron-builder"
   },
@@ -23,7 +26,7 @@
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@tailwindcss/postcss": "^4.1.17",
-    "@types/react": "^19.2.4",
+    "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.22",

@@ -6,13 +6,15 @@ import Store from "electron-store";
 import axios from "axios";
 
 const store = new Store();
-let mainWindow = null;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// ✅ DÉCLARER mainWindow EN GLOBAL
+let mainWindow = null;
+
 function createWindow() {
- mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     icon: path.join(__dirname, "public", "image4.jpg"),
@@ -22,14 +24,18 @@ function createWindow() {
       contextIsolation: true,
     },
   });
-console.log("BrowserWindow created:", mainWindow);
+  console.log("BrowserWindow created:", mainWindow);
   const isDev = process.argv.includes("--dev");
 
   if (isDev) {
     mainWindow.loadURL("http://localhost:5173");
+    mainWindow.webContents.openDevTools(); // débugger
   } else {
     mainWindow.loadFile(path.join(__dirname, "dist", "index.html"));
   }
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
 }
 
 app.setAsDefaultProtocolClient("sanbagierboelec");
@@ -52,7 +58,6 @@ async function exchangeCodeForToken(code) {
 
   return res.data.access_token;
 }
-
 
 // IPC pour lire le fichier mockup stories.json
 ipcMain.handle("read-books-json", async () => {
@@ -111,7 +116,8 @@ ipcMain.handle("write-markdown", async (event, args) => {
 // Lance login GitHub
 ipcMain.handle("github-login", async () => {
   const client_id = process.env.GITHUB_CLIENT_ID;
-  const authUrl = `https://github.com/login/oauth/authorize` +
+  const authUrl =
+    `https://github.com/login/oauth/authorize` +
     `?client_id=${client_id}` +
     `&redirect_uri=sanbagierboelec://auth` +
     `&scope=read:user`;
@@ -129,7 +135,6 @@ ipcMain.handle("github-logout", () => {
   store.delete("github_token");
   return true;
 });
-
 
 app.on("open-url", async (event, url) => {
   event.preventDefault();
@@ -159,4 +164,9 @@ app.whenReady().then(() => {
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
+});
+
+// ✅ Pour macOS - recréer la fenêtre si fermée
+app.on("activate", () => {
+  if (mainWindow === null) createWindow();
 });

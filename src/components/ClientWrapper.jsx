@@ -19,8 +19,8 @@ export default function ClientWrapper({
 }) {
   const [showLeft, setShowLeft] = useState(true);
   const [showRight, setShowRight] = useState(showRightDefault);
-  const [showTop, setShowTop] = useState(true);
-  const [showFooter, setShowFooter] = useState(true);
+  const [showTop] = useState(true);
+  const [showFooter] = useState(true);
 
  const location = useLocation();
 const pathname = location.pathname;
