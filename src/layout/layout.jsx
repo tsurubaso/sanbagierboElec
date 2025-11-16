@@ -1,16 +1,13 @@
-
-import { useLocation, useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; 
 import ClientWrapper from "@/components/ClientWrapper";
 import DictionarySidebarSimple from "@/components/DicoSimplePourSidebare";
 import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
 //import GithubSidebar from "@/components/GitHubSideBar";
 
-
 export default function PersonLayout({ children }) {
-   const location = useLocation();
-     const navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   const pathname = location.pathname;
-  
 
   // Catégories principales
   const isDraft = pathname.includes("draftlist");
@@ -24,20 +21,43 @@ export default function PersonLayout({ children }) {
   const isReader = pathname.includes("/reader");
   const isEditor = pathname.includes("/editor");
 
-
   // Base path
   const basePath = pathname.replace(/\/(reader|editor|creator)$/, "");
+
+  //  Fonction pour rescanner
+  const handleRescan = async () => {
+    try {
+      await window.electronAPI.rescanBooks();
+      console.log("✅ Livres rescannés !");
+      // Optionnel : recharger la page pour voir les changements
+      window.location.reload();
+    } catch (err) {
+      console.error("❌ Erreur rescan:", err);
+    }
+  };
 
   const navItemsTop = [
     { href: `${basePath}/reader`, label: "📖 Reader" },
     { href: `${basePath}/editor`, label: "✏️ Editor" },
   ];
 
-    // ✅ NOUVEAU : Boutons d'action
+  // Boutons d'action
   const actionButtons = [
-    { 
-      label: "⬅️ Go Back", 
-      onClick: () => navigate(-1) 
+    {
+      label: "⬅️ Go Back",
+      onClick: () => navigate(-1),
+    },
+  ];
+
+    const actionButtonsGrid = [
+    {
+      label: "⬅️ Go Back",
+      onClick: () => navigate(-1),
+    },
+
+    {
+      label: "🔄 Rescan Books",
+      onClick: handleRescan,
     },
   ];
 
@@ -72,9 +92,9 @@ export default function PersonLayout({ children }) {
   if (isRules) {
     return (
       <ClientWrapper
-       // navItemsTop={navItemsTop}
-       actionButtons={actionButtons}
-        rightSidebarContent={<h1>Tata</h1>}//{<GithubSidebar />}
+        // navItemsTop={navItemsTop}
+        actionButtons={actionButtons}
+        rightSidebarContent={<h1>Tata</h1>} //{<GithubSidebar />}
       >
         {children}
       </ClientWrapper>
@@ -84,9 +104,9 @@ export default function PersonLayout({ children }) {
   if (isDraft || isFragment || isIllustration || isOther || isStory) {
     return (
       <ClientWrapper
-       // navItemsTop={navItemsTop}
-       actionButtons={actionButtons}
-        rightSidebarContent={<h1>Tata</h1>}//{<GithubSidebar />}
+        // navItemsTop={navItemsTop}
+        actionButtons={actionButtonsGrid}
+        rightSidebarContent={<h1>Tata</h1>} //{<GithubSidebar />}
         showRightDefault={false}
       >
         {children}

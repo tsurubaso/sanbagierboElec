@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   
   //  fonctions
   readBooksJson: () => ipcRenderer.invoke("read-books-json"),
+   rescanBooks: () => ipcRenderer.invoke("rescan-books"), // 
   readMarkdown: (filePath) => ipcRenderer.invoke("read-markdown", filePath),
   readMarkdownEditing: (filePath) =>
     ipcRenderer.invoke("read-markdown-editing", filePath),

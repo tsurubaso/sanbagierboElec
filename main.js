@@ -3,10 +3,11 @@ import { app, BrowserWindow, ipcMain,  } from "electron";//shell
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-//import Store from "electron-store";
+import Store from "electron-store";
+import { scanBooksFolder } from "./api/bookScanner.js";
 //import axios from "axios";
 
-//const store = new Store();
+const store = new Store();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,16 +61,46 @@ async function exchangeCodeForToken(code) {
   return res.data.access_token;
 }
 */
-// IPC pour lire le fichier mockup stories.json
+
+
+// ✅ SCANNER LES LIVRES AU DÉMARRAGE
+async function scanAndStoreBooks() {
+  const booksPath = path.join(__dirname, "public", "books");
+  console.log("📚 Scanning books folder:", booksPath);
+  
+  const books = await scanBooksFolder(booksPath);
+  
+  console.log(`✅ Found ${books.length} books`);
+  
+  // Stocker dans electron-store
+  store.set("books", books);
+  store.set("books_last_scan", new Date().toISOString());
+  
+  return books;
+}
+
+
+
+// ✅ IPC HANDLER : Récupérer les livres depuis le store
 ipcMain.handle("read-books-json", async () => {
-  const filePath = path.join(__dirname, "public", "stories.json");
   try {
-    const data = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(data);
+    const books = store.get("books", []);
+    
+    // Si vide, rescanner
+    if (books.length === 0) {
+      return await scanAndStoreBooks();
+    }
+    
+    return books;
   } catch (error) {
-    console.error("Erreur lors de la lecture du fichier JSON:", error);
+    console.error("Erreur lors de la lecture des livres:", error);
     throw error;
   }
+});
+
+// ✅ IPC HANDLER : Forcer un rescan
+ipcMain.handle("rescan-books", async () => {
+  return await scanAndStoreBooks();
 });
 
 // IPC pour lire un fichier Markdown
@@ -161,8 +192,11 @@ app.on("open-url", async (event, url) => {
   }
 });
 */
-app.whenReady().then(() => {
+app.whenReady().then(async() => {
   console.log("Electron app ready");
+
+    // ✅ SCANNER AU DÉMARRAGE
+  await scanAndStoreBooks();
   createWindow();
 });
 
