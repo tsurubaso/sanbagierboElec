@@ -1,5 +1,5 @@
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate} from "react-router-dom";
 import ClientWrapper from "@/components/ClientWrapper";
 import DictionarySidebarSimple from "@/components/DicoSimplePourSidebare";
 import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
@@ -8,7 +8,9 @@ import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
 
 export default function PersonLayout({ children }) {
    const location = useLocation();
+     const navigate = useNavigate();
   const pathname = location.pathname;
+  
 
   // Catégories principales
   const isDraft = pathname.includes("draftlist");
@@ -31,11 +33,20 @@ export default function PersonLayout({ children }) {
     { href: `${basePath}/editor`, label: "✏️ Editor" },
   ];
 
+    // ✅ NOUVEAU : Boutons d'action
+  const actionButtons = [
+    { 
+      label: "⬅️ Go Back", 
+      onClick: () => navigate(-1) 
+    },
+  ];
+
   // === PRIORITÉ AUX MODES ===
   if (isReader) {
     return (
       <ClientWrapper
         navItemsTop={navItemsTop}
+        actionButtons={actionButtons} // ✅ Passer les boutons
         rightSidebarContent={<DictionarySidebarSimple />}
         showRightDefault={true}
       >
@@ -48,6 +59,7 @@ export default function PersonLayout({ children }) {
     return (
       <ClientWrapper
         navItemsTop={navItemsTop}
+        actionButtons={actionButtons}
         rightSidebarContent={<DictionarySidebarFull />}
         showRightDefault={true}
       >
@@ -61,6 +73,7 @@ export default function PersonLayout({ children }) {
     return (
       <ClientWrapper
        // navItemsTop={navItemsTop}
+       actionButtons={actionButtons}
         rightSidebarContent={<h1>Tata</h1>}//{<GithubSidebar />}
       >
         {children}
@@ -72,6 +85,7 @@ export default function PersonLayout({ children }) {
     return (
       <ClientWrapper
        // navItemsTop={navItemsTop}
+       actionButtons={actionButtons}
         rightSidebarContent={<h1>Tata</h1>}//{<GithubSidebar />}
         showRightDefault={false}
       >

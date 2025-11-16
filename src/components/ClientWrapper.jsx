@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 
 import { useLocation } from "react-router-dom";
@@ -12,24 +10,25 @@ import Footer from "./Footer";
 
 export default function ClientWrapper({
   children,
-  navItemsTop = [], // Pas de boutons pour l'instant
+  navItemsTop = [],
+  actionButtons = [],
   rightSidebarDescription = null,
   rightSidebarContent = null,
-  showRightDefault = true, // 
+  showRightDefault = true, //
 }) {
   const [showLeft, setShowLeft] = useState(true);
   const [showRight, setShowRight] = useState(showRightDefault);
   const [showTop] = useState(true);
   const [showFooter] = useState(true);
 
- const location = useLocation();
-const pathname = location.pathname;
+  const location = useLocation();
+  const pathname = location.pathname;
 
   // Exemple: "/BILLY/draftlist/reader" → ["", "BILLY", "draftlist", "reader"]
-  const [, person] = pathname.split("/")
+  const [, person] = pathname.split("/");
 
   // Fallback au cas où on est sur "/" ou route sans nom
-  const currentPerson = person
+  const currentPerson = person;
 
   const navItems = [
     { href: `/${currentPerson}/Rules`, label: "📜 Les Règles" },
@@ -38,7 +37,7 @@ const pathname = location.pathname;
     { href: `/${currentPerson}/fragmentlist`, label: "✂️ Fragments" },
     { href: `/${currentPerson}/otherlist`, label: "🗂️ Autres" },
     { href: `/${currentPerson}/illustrationlist`, label: "🎨 Illustrations" },
-  ]
+  ];
 
   return (
     <>
@@ -48,7 +47,8 @@ const pathname = location.pathname;
           <TopBar
             onToggleLeft={() => setShowLeft(!showLeft)}
             onToggleRight={() => setShowRight(!showRight)}
-            navItems={navItemsTop} // tu peux aussi ne rien passer du tout
+           navItems={navItemsTop}
+          actionButtons={actionButtons}
           />
         )}
 

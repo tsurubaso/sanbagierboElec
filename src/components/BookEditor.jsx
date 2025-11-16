@@ -1,12 +1,12 @@
 // src/components/BookEditor.jsx
 import { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
-import { useNavigate } from "react-router-dom";
+
 
 export default function BookEditor({ book }) {
   const [content, setContent] = useState("");
   const [status, setStatus] = useState("loading");
-    const navigate = useNavigate();
+
 
   const fileName = `${book}.md`;
 
@@ -50,13 +50,7 @@ export default function BookEditor({ book }) {
         >
           Save
         </button>
-                {/* Go back */}
-        <button
-          onClick={() => navigate(-1)}
-          className="px-4 py-2 bg-gray-600 text-white rounded"
-        >
-          before
-        </button>
+    
       </div>
 
       <div className="flex-1">

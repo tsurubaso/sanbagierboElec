@@ -18,9 +18,8 @@ const {
 const Home = () => {
   const navigate = useNavigate();
   const routes = [
-    { label: "Rules", path: "/BILLY/Rules" },
-    { label: "Illustrations", path: "/BILLY/illustrationlist" },
-    { label: "drafts", path: "/BILLY/draftlist" },
+    { label: "C'est par là!", path: "/BILLY/Rules" },
+
   ];
   const handleClick = (path) => {
     navigate(path);

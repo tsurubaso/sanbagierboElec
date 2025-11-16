@@ -1,8 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function Rules() {
-  const navigate = useNavigate();
   return (
     <main
       className="min-h-screen py-2"
@@ -11,18 +9,6 @@ export default function Rules() {
         color: "var(--foreground)",
       }}
     >
-      <div className="p-6">
-
-
-        {/* Go back to previous page */}
-        <button
-          onClick={() => navigate(-1)}
-          className="px-4 py-2 bg-gray-600 text-white rounded"
-        >
-          Go Back
-        </button>
-      </div>
-
       <div className="w-full max-w-4xl p-8 rounded-lg shadow-md border mx-auto">
         <h1 className="text-3xl font-extrabold text-center mb-4">
           📖 Les règles

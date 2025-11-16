@@ -1,9 +1,12 @@
-"use client";
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-export default function TopBar({ onToggleLeft, onToggleRight, navItems = [] }) {
+export default function TopBar({
+  onToggleLeft,
+  onToggleRight,
+  navItems,
+  actionButtons = [],
+}) {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -23,7 +26,6 @@ export default function TopBar({ onToggleLeft, onToggleRight, navItems = [] }) {
         </button>
         {/* === Centre : titre + boutons s'il y en a === */}
         <div className="flex items-center space-x-3">
-          <h1 className="text-lg font-bold mr-2">SanBagierBo</h1>
           {/* Si on a des navItems, on les affiche */}
           <div className="flex items-center justify-center space-x-3 flex-1">
             {Array.isArray(navItems) &&
@@ -37,6 +39,16 @@ export default function TopBar({ onToggleLeft, onToggleRight, navItems = [] }) {
                   {item.label}
                 </Link>
               ))}
+            {/* Boutons d'action (onClick) */}
+            {actionButtons.map((button, index) => (
+              <button
+                key={index}
+                onClick={button.onClick}
+                className="px-3 py-1 bg-gray-600 rounded hover:bg-gray-500 text-sm"
+              >
+                {button.label}
+              </button>
+            ))}
           </div>
         </div>
         {/* === Bouton droite : toggle sidebar droite === */}

@@ -3,10 +3,10 @@ import { app, BrowserWindow, ipcMain,  } from "electron";//shell
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import Store from "electron-store";
+//import Store from "electron-store";
 //import axios from "axios";
 
-const store = new Store();
+//const store = new Store();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -139,6 +139,7 @@ ipcMain.handle("github-logout", () => {
   return true;
 });
 */
+/*
 app.on("open-url", async (event, url) => {
   event.preventDefault();
 
@@ -159,7 +160,7 @@ app.on("open-url", async (event, url) => {
     console.error("OAuth failed:", err);
   }
 });
-
+*/
 app.whenReady().then(() => {
   console.log("Electron app ready");
   createWindow();
