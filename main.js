@@ -1,18 +1,20 @@
+
 import 'dotenv/config';
-import { app, BrowserWindow, ipcMain,  } from "electron";//shell
+import { app, BrowserWindow, ipcMain, shell  } from "electron";//
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import Store from "electron-store";
 import { scanBooksFolder } from "./api/bookScanner.js";
-//import axios from "axios";
+import { exchangeCodeForToken } from "./api/github.js";
+//console.log("ENV CHECK:", process.env.GITHUB_CLIENT_ID, process.env.GITHUB_CLIENT_SECRET);
 
 const store = new Store();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ DÉCLARER mainWindow EN GLOBAL
+//  DÉCLARER mainWindow EN GLOBAL
 let mainWindow = null;
 
 function createWindow() {
@@ -26,7 +28,7 @@ function createWindow() {
       contextIsolation: true,
     },
   });
-  console.log("BrowserWindow created:", mainWindow);
+  console.log("BrowserWindow created:");
   const isDev = process.argv.includes("--dev");
 
   if (isDev) {
@@ -40,30 +42,9 @@ function createWindow() {
   });
 }
 
-//app.setAsDefaultProtocolClient("sanbagierboelec");
-/*
-async function exchangeCodeForToken(code) {
-  const client_id = process.env.GITHUB_CLIENT_ID;
-  const client_secret = process.env.GITHUB_CLIENT_SECRET;
+app.setAsDefaultProtocolClient("sanbagierboelec");
 
-  const res = await axios.post(
-    "https://github.com/login/oauth/access_token",
-    {
-      client_id,
-      client_secret,
-      code,
-    },
-    { headers: { Accept: "application/json" } }
-  );
-
-  if (!res.data.access_token) throw new Error("GitHub returned no token");
-
-  return res.data.access_token;
-}
-*/
-
-
-// ✅ SCANNER LES LIVRES AU DÉMARRAGE
+//  SCANNER LES LIVRES AU DÉMARRAGE
 async function scanAndStoreBooks() {
   const booksPath = path.join(__dirname, "public", "books");
   console.log("📚 Scanning books folder:", booksPath);
@@ -81,7 +62,7 @@ async function scanAndStoreBooks() {
 
 
 
-// ✅ IPC HANDLER : Récupérer les livres depuis le store
+//  IPC HANDLER : Récupérer les livres depuis le store
 ipcMain.handle("read-books-json", async () => {
   try {
     const books = store.get("books", []);
@@ -98,7 +79,7 @@ ipcMain.handle("read-books-json", async () => {
   }
 });
 
-// ✅ IPC HANDLER : Forcer un rescan
+//  IPC HANDLER : Forcer un rescan
 ipcMain.handle("rescan-books", async () => {
   return await scanAndStoreBooks();
 });
@@ -144,7 +125,7 @@ ipcMain.handle("write-markdown", async (event, args) => {
     throw err;
   }
 });
-/*
+
 // Lance login GitHub
 ipcMain.handle("github-login", async () => {
   const client_id = process.env.GITHUB_CLIENT_ID;
@@ -156,21 +137,21 @@ ipcMain.handle("github-login", async () => {
 
   shell.openExternal(authUrl);
 });
-*/
-/*
+
+
 // Récupère la session si présente
 ipcMain.handle("github-session", () => {
   return store.get("github_token", null);
 });
-*/
-/*
+
+
 // Logout
 ipcMain.handle("github-logout", () => {
   store.delete("github_token");
   return true;
 });
-*/
-/*
+
+
 app.on("open-url", async (event, url) => {
   event.preventDefault();
 
@@ -191,7 +172,7 @@ app.on("open-url", async (event, url) => {
     console.error("OAuth failed:", err);
   }
 });
-*/
+
 app.whenReady().then(async() => {
   console.log("Electron app ready");
 

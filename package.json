@@ -9,12 +9,12 @@
     "electron:dev": "npx electron . --dev",
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 --timeout 600000 && electron . --dev\"",
     "dev2": "concurrently \"npm run vite\" \"npm run electron:dev\"",
+    "dev3": "concurrently -k \"npm run vite\" \"npm run electron:dev\"",
     "start": "electron .",
     "build": "vite build && electron-builder"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
-    "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "electron-store": "^11.0.2",
     "framer-motion": "^12.23.24",
