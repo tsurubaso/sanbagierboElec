@@ -1,6 +1,5 @@
-
-import 'dotenv/config';
-import { app, BrowserWindow, ipcMain, shell  } from "electron";//
+import "dotenv/config";
+import { app, BrowserWindow, ipcMain, shell } from "electron"; //
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -28,7 +27,7 @@ function createWindow() {
       contextIsolation: true,
     },
   });
-  console.log("BrowserWindow created:");
+  console.log("BrowserWindow created");
   const isDev = process.argv.includes("--dev");
 
   if (isDev) {
@@ -42,36 +41,32 @@ function createWindow() {
   });
 }
 
-app.setAsDefaultProtocolClient("sanbagierboelec");
-
 //  SCANNER LES LIVRES AU DÉMARRAGE
 async function scanAndStoreBooks() {
   const booksPath = path.join(__dirname, "public", "books");
   console.log("📚 Scanning books folder:", booksPath);
-  
+
   const books = await scanBooksFolder(booksPath);
-  
+
   console.log(`✅ Found ${books.length} books`);
-  
+
   // Stocker dans electron-store
   store.set("books", books);
   store.set("books_last_scan", new Date().toISOString());
-  
+
   return books;
 }
-
-
 
 //  IPC HANDLER : Récupérer les livres depuis le store
 ipcMain.handle("read-books-json", async () => {
   try {
     const books = store.get("books", []);
-    
+
     // Si vide, rescanner
     if (books.length === 0) {
       return await scanAndStoreBooks();
     }
-    
+
     return books;
   } catch (error) {
     console.error("Erreur lors de la lecture des livres:", error);
@@ -138,12 +133,10 @@ ipcMain.handle("github-login", async () => {
   shell.openExternal(authUrl);
 });
 
-
 // Récupère la session si présente
 ipcMain.handle("github-session", () => {
   return store.get("github_token", null);
 });
-
 
 // Logout
 ipcMain.handle("github-logout", () => {
@@ -151,18 +144,14 @@ ipcMain.handle("github-logout", () => {
   return true;
 });
 
-
 app.on("open-url", async (event, url) => {
   event.preventDefault();
-
+  console.log("OAuth redirect received:", url);
   const code = new URL(url).searchParams.get("code");
   if (!code) return;
 
   try {
     const token = await exchangeCodeForToken(code);
-
-    // sauvegarde localement
-    store.set("github_token", token);
 
     // prévenir le renderer
     if (mainWindow) {
@@ -173,10 +162,15 @@ app.on("open-url", async (event, url) => {
   }
 });
 
-app.whenReady().then(async() => {
+app.whenReady().then(async () => {
   console.log("Electron app ready");
 
-    // ✅ SCANNER AU DÉMARRAGE
+  //  ENREGISTRER LE PROTOCOLE ICI
+  if (process.platform === "win32") {
+    app.setAsDefaultProtocolClient("sanbagierboelec");
+  }
+
+  //  SCANNER AU DÉMARRAGE
   await scanAndStoreBooks();
   createWindow();
 });

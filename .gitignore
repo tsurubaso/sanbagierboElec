@@ -14,7 +14,6 @@ dist-ssr
 .env
 .env.*.local
 .vite
-ERASEME.js 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
