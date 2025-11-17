@@ -15,12 +15,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   //fonctions liées à Gitthub
   githubLogin: () => ipcRenderer.invoke("github-login"),
+  githubPollToken: (deviceCode) =>
+    ipcRenderer.invoke("github-poll-token", deviceCode),
   githubSession: () => ipcRenderer.invoke("github-session"),
   githubLogout: () => ipcRenderer.invoke("github-logout"),
-  //retourne une fonction de nettoyage
+  //fonctions de Sync
+  githubPull: () => ipcRenderer.invoke("github-pull"),
+  githubPush: () => ipcRenderer.invoke("github-push"),
+  githubSync: () => ipcRenderer.invoke("github-sync"),
   onAuthSuccess: (callback) => {
     ipcRenderer.on("auth-success", callback);
-    //Retourne la fonction pour désinscrire le listener
     return () => ipcRenderer.removeListener("auth-success", callback);
-  },
+},
 });

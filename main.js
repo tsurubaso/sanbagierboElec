@@ -5,8 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Store from "electron-store";
 import { scanBooksFolder } from "./api/bookScanner.js";
-import { exchangeCodeForToken } from "./api/github.js";
-//console.log("ENV CHECK:", process.env.GITHUB_CLIENT_ID, process.env.GITHUB_CLIENT_SECRET);
+import simpleGit from 'simple-git';
 
 const store = new Store();
 
@@ -124,13 +123,81 @@ ipcMain.handle("write-markdown", async (event, args) => {
 // Lance login GitHub
 ipcMain.handle("github-login", async () => {
   const client_id = process.env.GITHUB_CLIENT_ID;
-  const authUrl =
-    `https://github.com/login/oauth/authorize` +
-    `?client_id=${client_id}` +
-    `&redirect_uri=sanbagierboelec://auth` +
-    `&scope=read:user`;
+  
+  try {
+    // 1. Demander un device code
+  const params = new URLSearchParams();
+    params.append("client_id", client_id);
+    params.append("scope", "read:user repo");
 
-  shell.openExternal(authUrl);
+    const deviceResponse = await fetch(
+      "https://github.com/login/device/code",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+        body: params
+      }
+    );
+    
+    const deviceData = await deviceResponse.json();
+    
+        if (!deviceData.user_code) {
+      throw new Error("Invalid device response: " + JSON.stringify(deviceData));
+    }
+
+    // Ouvrir le navigateur
+    await shell.openExternal(deviceData.verification_uri);
+    
+    // 3. Retourner le code à afficher à l'utilisateur
+    return {
+      user_code: deviceData.user_code,
+      device_code: deviceData.device_code,
+      interval: deviceData.interval,
+    };
+  } catch (err) {
+    console.error("Device flow error:", err);
+    throw err;
+  }
+});
+
+// ✅ Polling pour vérifier si l'utilisateur a validé
+ipcMain.handle("github-poll-token", async (event, deviceCode) => {
+  const client_id = process.env.GITHUB_CLIENT_ID;
+  
+  try {
+   const params = new URLSearchParams();
+    params.append("client_id", client_id);
+    params.append("device_code", deviceCode);
+    params.append("grant_type", "urn:ietf:params:oauth:grant-type:device_code");
+
+    const tokenResponse = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+        body: params
+      }
+    );
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (tokenData.access_token) {
+      store.set("github_token", tokenData.access_token);
+      return { success: true, token: tokenData.access_token };
+    }
+    
+    // Encore en attente
+    return { success: false, error: tokenData.error };
+  } catch (err) {
+    console.error("Token poll error:", err);
+    return { success: false, error: err.message };
+  }
 });
 
 // Récupère la session si présente
@@ -144,31 +211,44 @@ ipcMain.handle("github-logout", () => {
   return true;
 });
 
-app.on("open-url", async (event, url) => {
-  event.preventDefault();
-  console.log("OAuth redirect received:", url);
-  const code = new URL(url).searchParams.get("code");
-  if (!code) return;
+ipcMain.handle("github-pull", async () => {
+  console.log("GitHub Pull START");
+  return true;
+});
+
+ipcMain.handle("github-push", async () => {
+  const token = store.get("github_token");
+  if (!token) {
+    throw new Error("No GitHub token available. Please login first.");
+  }
 
   try {
-    const token = await exchangeCodeForToken(code);
+    // TODO: Ici on met la logique push (par ex. commit + push fichiers)
+    // Exemple basique : git add . && git commit -m "sync" && git push
+    // On peut utiliser simple-git ou exécuter des commandes via child_process
 
-    // prévenir le renderer
-    if (mainWindow) {
-      mainWindow.webContents.send("auth-success", token);
-    }
+   
+    const git = simpleGit({ baseDir: path.join(__dirname, 'public', 'books') });
+
+    await git.add('.');
+    await git.commit('Sync from Electron app');
+    await git.push('origin', 'master');
+
+    return { success: true };
   } catch (err) {
-    console.error("OAuth failed:", err);
+    console.error("GitHub push error:", err);
+    return { success: false, error: err.message };
   }
+});
+
+
+ipcMain.handle("github-sync", async () => {
+  console.log("GitHub Sync START");
+  return true;
 });
 
 app.whenReady().then(async () => {
   console.log("Electron app ready");
-
-  //  ENREGISTRER LE PROTOCOLE ICI
-  if (process.platform === "win32") {
-    app.setAsDefaultProtocolClient("sanbagierboelec");
-  }
 
   //  SCANNER AU DÉMARRAGE
   await scanAndStoreBooks();

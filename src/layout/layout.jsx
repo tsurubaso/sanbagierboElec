@@ -2,7 +2,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ClientWrapper from "@/components/ClientWrapper";
 import DictionarySidebarSimple from "@/components/DicoSimplePourSidebare";
 import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
-import GithubSidebar from "@/components/GitHubSideBar";
+import GithubDeviceLogin from "@/components/GithubDeviceLogin";
+import GithubSyncButtons from "@/components/GithubSyncButtons";
+
 
 export default function PersonLayout({ children }) {
   const location = useLocation();
@@ -94,7 +96,7 @@ export default function PersonLayout({ children }) {
       <ClientWrapper
         // navItemsTop={navItemsTop}
         actionButtons={actionButtons}
-        rightSidebarContent={<GithubSidebar />} //
+        rightSidebarContent={<div><GithubDeviceLogin /><GithubSyncButtons /></div>} //
       >
         {children}
       </ClientWrapper>
@@ -106,7 +108,7 @@ export default function PersonLayout({ children }) {
       <ClientWrapper
         // navItemsTop={navItemsTop}
         actionButtons={actionButtonsGrid}
-        rightSidebarContent={<GithubSidebar />} //
+        rightSidebarContent={<div><GithubDeviceLogin /><GithubSyncButtons /></div>} //
         showRightDefault={false}
       >
         {children}

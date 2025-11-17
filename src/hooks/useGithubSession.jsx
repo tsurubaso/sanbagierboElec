@@ -1,41 +1,24 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-export default function useGithubSession() {
+export function useGithubSession() {
   const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ VÉRIFICATION
-    if (!window.electronAPI) {
-      console.error("❌ electronAPI n'est pas disponible !");
-      console.log("window.electronAPI:", window.electronAPI);
-      return;
+    async function load() {
+      const t = await window.electronAPI.githubSession();
+      setToken(t);
+      setLoading(false);
     }
+    load();
 
-    // Récupérer la session au chargement
-    window.electronAPI
-      .githubSession()
-      .then(setToken)
-      .catch((err) => console.error("Erreur session:", err));
-
-    // Écouter les nouveaux tokens
-    const unsubscribe = window.electronAPI.onAuthSuccess((event, tok) => {
-      setToken(tok);
+    // écouter auth-success (device flow terminé)
+    const unsubscribe = window.electronAPI.onAuthSuccess((_, newToken) => {
+      setToken(newToken);
     });
-    return unsubscribe;
+
+    return () => unsubscribe();
   }, []);
 
-  const signIn = () => {
-    if (!window.electronAPI) {
-      console.error("❌ electronAPI n'est pas disponible");
-      return;
-    }
-    window.electronAPI.githubLogin();
-  };
-
-  const signOut = () => {
-    if (!window.electronAPI) return;
-    window.electronAPI.githubLogout().then(() => setToken(null));
-  };
-
-  return { token, signIn, signOut };
+  return { token, loading };
 }
