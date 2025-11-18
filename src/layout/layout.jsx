@@ -1,10 +1,8 @@
-import { useLocation, useNavigate } from "react-router-dom"; 
+import { useLocation, useNavigate } from "react-router-dom";
 import ClientWrapper from "@/components/ClientWrapper";
 import DictionarySidebarSimple from "@/components/DicoSimplePourSidebare";
 import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
-import GithubDeviceLogin from "@/components/GithubDeviceLogin";
-import GithubSyncButtons from "@/components/GithubSyncButtons";
-
+import GithubSidebar from "@/components/GithubSidebar";
 
 export default function PersonLayout({ children }) {
   const location = useLocation();
@@ -22,6 +20,7 @@ export default function PersonLayout({ children }) {
   // Modes
   const isReader = pathname.includes("/reader");
   const isEditor = pathname.includes("/editor");
+  const isCreator = pathname.includes("/creator");
 
   // Base path
   const basePath = pathname.replace(/\/(reader|editor|creator)$/, "");
@@ -41,6 +40,7 @@ export default function PersonLayout({ children }) {
   const navItemsTop = [
     { href: `${basePath}/reader`, label: "📖 Reader" },
     { href: `${basePath}/editor`, label: "✏️ Editor" },
+    { href: `${basePath}/creator`, label: "🖋️ Creator" },
   ];
 
   // Boutons d'action
@@ -51,7 +51,7 @@ export default function PersonLayout({ children }) {
     },
   ];
 
-    const actionButtonsGrid = [
+  const actionButtonsGrid = [
     {
       label: "⬅️ Go Back",
       onClick: () => navigate(-1),
@@ -77,7 +77,7 @@ export default function PersonLayout({ children }) {
     );
   }
 
-  if (isEditor) {
+  if (isEditor || isCreator ) {
     return (
       <ClientWrapper
         navItemsTop={navItemsTop}
@@ -96,19 +96,27 @@ export default function PersonLayout({ children }) {
       <ClientWrapper
         // navItemsTop={navItemsTop}
         actionButtons={actionButtons}
-        rightSidebarContent={<div><GithubDeviceLogin /><GithubSyncButtons /></div>} //
+        rightSidebarContent={
+          <div>
+            <GithubSidebar/>
+          </div>
+        } //
       >
         {children}
       </ClientWrapper>
     );
   }
 
-  if (isDraft || isFragment || isIllustration || isOther || isStory) {
+  if (isDraft || isFragment || isIllustration || isOther || isStory ) {
     return (
       <ClientWrapper
         // navItemsTop={navItemsTop}
         actionButtons={actionButtonsGrid}
-        rightSidebarContent={<div><GithubDeviceLogin /><GithubSyncButtons /></div>} //
+        rightSidebarContent={
+          <div>
+            <GithubSidebar/>
+          </div>
+        } //
         showRightDefault={false}
       >
         {children}

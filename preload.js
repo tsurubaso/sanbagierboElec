@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("write-markdown", { filePath, content }),
 
   //fonctions liées à Gitthub
+  githubProfile: () => ipcRenderer.invoke("github-profile"),
   githubLogin: () => ipcRenderer.invoke("github-login"),
   githubPollToken: (deviceCode) =>
     ipcRenderer.invoke("github-poll-token", deviceCode),
@@ -26,5 +27,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onAuthSuccess: (callback) => {
     ipcRenderer.on("auth-success", callback);
     return () => ipcRenderer.removeListener("auth-success", callback);
+  
 },
 });

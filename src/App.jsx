@@ -9,6 +9,8 @@ const IllustrationList = lazy(() => import("@/pages/illustrationlist"));
 const Reader = lazy(() => import("@/pages/Reader"));
 const Editor = lazy(() => import("@/pages/Editor"));
 const GridPage = lazy(() => import("@/pages/GridPage"));
+const Creator = lazy(() => import("@/pages/Creator"));
+
 
 function App() {
   return (
@@ -49,6 +51,12 @@ function App() {
                   <Route
                     path="/:person/:statuslist/:link/editor"
                     element={<Editor />}
+                  />
+
+                  {/* ✏️ Creator */}
+                  <Route
+                    path="/:person/:statuslist/:link/creator"
+                    element={<Creator />}
                   />
                 </Routes>
               </PersonLayout>

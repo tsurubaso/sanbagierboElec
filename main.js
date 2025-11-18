@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Store from "electron-store";
 import { scanBooksFolder } from "./api/bookScanner.js";
-import simpleGit from 'simple-git';
+import simpleGit from "simple-git";
 
 const store = new Store();
 
@@ -120,37 +120,38 @@ ipcMain.handle("write-markdown", async (event, args) => {
   }
 });
 
+// =======================================================
+// GITHUB DEVICE FLOW / SESSION
+// =======================================================
+
 // Lance login GitHub
 ipcMain.handle("github-login", async () => {
   const client_id = process.env.GITHUB_CLIENT_ID;
-  
+
   try {
     // 1. Demander un device code
-  const params = new URLSearchParams();
+    const params = new URLSearchParams();
     params.append("client_id", client_id);
     params.append("scope", "read:user repo");
 
-    const deviceResponse = await fetch(
-      "https://github.com/login/device/code",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Accept: "application/json",
-        },
-        body: params
-      }
-    );
-    
+    const deviceResponse = await fetch("https://github.com/login/device/code", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+      },
+      body: params,
+    });
+
     const deviceData = await deviceResponse.json();
-    
-        if (!deviceData.user_code) {
+
+    if (!deviceData.user_code) {
       throw new Error("Invalid device response: " + JSON.stringify(deviceData));
     }
 
     // Ouvrir le navigateur
     await shell.openExternal(deviceData.verification_uri);
-    
+
     // 3. Retourner le code à afficher à l'utilisateur
     return {
       user_code: deviceData.user_code,
@@ -166,9 +167,9 @@ ipcMain.handle("github-login", async () => {
 // ✅ Polling pour vérifier si l'utilisateur a validé
 ipcMain.handle("github-poll-token", async (event, deviceCode) => {
   const client_id = process.env.GITHUB_CLIENT_ID;
-  
+
   try {
-   const params = new URLSearchParams();
+    const params = new URLSearchParams();
     params.append("client_id", client_id);
     params.append("device_code", deviceCode);
     params.append("grant_type", "urn:ietf:params:oauth:grant-type:device_code");
@@ -181,17 +182,17 @@ ipcMain.handle("github-poll-token", async (event, deviceCode) => {
           "Content-Type": "application/x-www-form-urlencoded",
           Accept: "application/json",
         },
-        body: params
+        body: params,
       }
     );
-    
+
     const tokenData = await tokenResponse.json();
-    
+
     if (tokenData.access_token) {
       store.set("github_token", tokenData.access_token);
       return { success: true, token: tokenData.access_token };
     }
-    
+
     // Encore en attente
     return { success: false, error: tokenData.error };
   } catch (err) {
@@ -211,40 +212,112 @@ ipcMain.handle("github-logout", () => {
   return true;
 });
 
-ipcMain.handle("github-pull", async () => {
-  console.log("GitHub Pull START");
-  return true;
-});
+// =======================================================
+// GITHUB PROFILE
+// =======================================================
 
-ipcMain.handle("github-push", async () => {
+ipcMain.handle("github-profile", async () => {
   const token = store.get("github_token");
-  if (!token) {
-    throw new Error("No GitHub token available. Please login first.");
+   if (!token) {
+    throw new Error("Not authenticated");
   }
 
   try {
-    // TODO: Ici on met la logique push (par ex. commit + push fichiers)
-    // Exemple basique : git add . && git commit -m "sync" && git push
-    // On peut utiliser simple-git ou exécuter des commandes via child_process
+    const response = await fetch("https://api.github.com/user", {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/vnd.github+json"
+      }
+    });
 
-   
-    const git = simpleGit({ baseDir: path.join(__dirname, 'public', 'books') });
+    if (!response.ok) {
+      throw new Error("GitHub API error: " + response.status);
+    }
 
-    await git.add('.');
-    await git.commit('Sync from Electron app');
-    await git.push('origin', 'master');
+    const profile = await response.json();
 
+    return {
+      login: profile.login,
+      name: profile.name,
+      bio: profile.bio,
+      avatar_url: profile.avatar_url,
+      html_url: profile.html_url
+    };
+
+  } catch (err) {
+    console.error("GitHub profile error:", err);
+    throw err;
+  }
+});
+
+// =======================================================
+// GIT OPS (pull / push / sync)
+// =======================================================
+
+const WORKSPACE = process.cwd(); // dossier réel, pas asar !
+const SUBMODULE = path.join(WORKSPACE, "public/books");
+
+const gitParent = simpleGit(WORKSPACE);
+const gitSub = simpleGit(SUBMODULE);
+
+// ----------------------
+//  PULL
+// ----------------------
+ipcMain.handle("github-pull", async () => {
+  try {
+    await gitSub.pull("origin");
+    await gitParent.pull("origin");
     return { success: true };
   } catch (err) {
-    console.error("GitHub push error:", err);
+    console.error("Pull error:", err);
     return { success: false, error: err.message };
   }
 });
 
+// ----------------------
+//  PUSH
+// ----------------------
+ipcMain.handle("github-push", async () => {
+  const token = store.get("github_token");
+  if (!token) return { success: false, error: "No token" };
 
+  try {
+    await gitSub.add(".");
+    await gitSub.commit("Update books from Electron").catch(() => {});
+    await gitSub.push(["origin", "master"]); // ou "main" si applicable
+
+    await gitParent.add("public/books");
+    await gitParent.commit("Update submodule pointer").catch(() => {});
+    await gitParent.push(["origin", "main"]);
+
+    return { success: true };
+  } catch (err) {
+    console.error("Push error:", err);
+    return { success: false, error: err.message };
+  }
+});
+
+// ----------------------
+//  SYNC (pull + push)
+// ----------------------
 ipcMain.handle("github-sync", async () => {
-  console.log("GitHub Sync START");
-  return true;
+  try {
+    await gitSub.pull("origin");
+    await gitParent.pull("origin");
+
+    await gitSub.add(".");
+    await gitSub.commit("Sync from Electron").catch(() => {});
+    await gitSub.push("origin", "master");
+
+    await gitParent.add("public/books");
+    await gitParent.commit("Sync submodule pointer").catch(() => {});
+    await gitParent.push("origin", "main");
+
+    return { success: true };
+  } catch (err) {
+    console.error("Sync error:", err);
+    return { success: false, error: err.message };
+  }
 });
 
 app.whenReady().then(async () => {

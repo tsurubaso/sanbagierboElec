@@ -20,5 +20,9 @@ export function useGithubSession() {
     return () => unsubscribe();
   }, []);
 
-  return { token, loading };
+    return {
+    token,
+    tokenPresent: Boolean(token),
+    loading,
+  };
 }

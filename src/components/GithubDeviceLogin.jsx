@@ -5,7 +5,6 @@ export default function GithubDeviceLogin() {
   const { tokenPresent, loading } = useGithubSession();
   const [userCode, setUserCode] = useState(null);
   const [polling, setPolling] = useState(false);
-  const [token, setToken] = useState(null);
 
   if (loading) return null; // attente
   if (tokenPresent) return <div>🔒 Connecté à GitHub</div>;
@@ -18,26 +17,20 @@ export default function GithubDeviceLogin() {
       setUserCode(user_code);
       setPolling(true);
 
-      // Polling toutes les X secondes
       const pollInterval = setInterval(async () => {
         const result = await window.electronAPI.githubPollToken(device_code);
 
         if (result.success) {
-          setToken(result.token);
+          clearInterval(pollInterval);
           setPolling(false);
           setUserCode(null);
-          clearInterval(pollInterval);
           alert("✅ Connecté à GitHub!");
           return;
         }
 
-        if (result.error === "authorization_pending") {
-          return; // normal, continue à poller
-        }
-
+        if (result.error === "authorization_pending") return;
         if (result.error === "slow_down") {
-          console.log("⏳ GitHub said slow_down → increasing interval");
-          interval += 2; // augmente l'intervalle
+          interval += 2;
           return;
         }
 
@@ -49,10 +42,6 @@ export default function GithubDeviceLogin() {
       console.error("Login error:", err);
     }
   };
-
-  if (token) {
-    return <div>✅ Connecté!</div>;
-  }
 
   if (polling) {
     return (
