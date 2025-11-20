@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   githubSync: () => ipcRenderer.invoke("github-sync"),
   onAuthSuccess: (callback) => {
     ipcRenderer.on("auth-success", callback);
-    return () => ipcRenderer.removeListener("auth-success", callback);},
-  createOrUpdateBook: (fileName, content) =>ipcRenderer.invoke("create-or-update-book", { fileName, content }),
+    return () => ipcRenderer.removeListener("auth-success", callback);
+  
+},
 });

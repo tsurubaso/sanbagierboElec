@@ -319,21 +319,6 @@ ipcMain.handle("github-sync", async () => {
     return { success: false, error: err.message };
   }
 });
-// ----------------------
-//  Create or update book
-// ----------------------
-ipcMain.handle("create-or-update-book", async (event, fileName, content) => {
-  const SUBMODULE = path.join(__dirname, "public/books"); // submodule path
-  const filePath = path.join(SUBMODULE, `${fileName}.md`);
-
-  try {
-    await fs.promises.writeFile(filePath, content, "utf8");
-    return { success: true, filePath };
-  } catch (err) {
-    console.error("Failed to save book:", err);
-    throw err;
-  }
-});
 
 app.whenReady().then(async () => {
   console.log("Electron app ready");
