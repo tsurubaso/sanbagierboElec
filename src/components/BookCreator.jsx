@@ -25,15 +25,29 @@ timelineEnd:
     if (!code.trim()) return; // nothing to save
     setSaving(true);
 
-    try {
-      // Call your Electron API to save in the submodule
-      // We'll assume you add a function `createOrUpdateBook(fileName, content)`
-      const fileName = `new_book_${Date.now()}`; // unique filename
-      await window.electronAPI.createOrUpdateBook(fileName, code);
+  try {
+    // 1️⃣ Extraire link:
+    const match = code.match(/link:\s*([^\s]+)/);
+    if (!match) {
+      alert("❌ Le champ 'link:' est manquant !");
+      return;
+    }
 
-      alert(`✅ Saved as ${fileName}.md`);
-      setCode(""); // clear editor after saving
-    } catch (err) {
+    // 2️⃣ Nettoyer pour nom de fichier
+    const fileName = match[1].trim().replace(/[^a-zA-Z0-9-_]/g, "");
+
+    // 3️⃣ Appeler l'API Electron
+    const result = await window.electronAPI.createOrUpdateBook(fileName, code);
+
+    // 4️⃣ Afficher le résultat
+    if (result.ok) {
+      alert(`✅ Saved as ${result.fileName}.md`);
+      setCode(initialTemplate); // reset editor
+    } else {
+      alert(`❌ Failed: ${result.error}`);
+    }
+
+  }  catch (err) {
       console.error("Error saving book:", err);
       alert("❌ Failed to save book");
     } finally {

@@ -365,7 +365,7 @@ ipcMain.handle(
       await fs.promises.writeFile(filePath, content, "utf-8");
 
       console.log("📘 Book saved:", filePath);
-      return { success: true, filePath };
+      return { ok: true, fileName: filePath }; 
     } catch (err) {
       console.error("❌ Error saving book:", err);
       return { success: false, error: err.message };
