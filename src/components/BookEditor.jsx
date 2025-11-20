@@ -3,15 +3,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 
-
 export default function BookEditor({ book }) {
   const [content, setContent] = useState("");
   const [status, setStatus] = useState("loading");
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const fileName = `${book}.md`;
-
-
 
   useEffect(() => {
     const load = async () => {
@@ -28,7 +25,7 @@ const navigate = useNavigate();
     load();
   }, [book]);
 
-    const saveFile = async () => {
+  const saveFile = async () => {
     try {
       await window.electronAPI.writeMarkdown(book, content);
       alert("Saved!");
@@ -38,16 +35,18 @@ const navigate = useNavigate();
     }
   };
 
-    const deleteFile = async () => {
-    if (!window.confirm(`⚠️ Are you sure you want to delete ${fileName}?`)) return;
+  const deleteFile = async () => {
+    if (!window.confirm(`⚠️ Are you sure you want to delete ${fileName}?`))
+      return;
 
     try {
       await window.electronAPI.eraseMarkdown(book); // nouvelle API côté main.js
+    
 
-
-      
       alert(`✅ ${fileName} deleted.`);
       navigate("/"); // retour à la home
+      // Lancer le rescan sans bloquer
+    window.electronAPI.rescanBooks().catch(err => console.error("Rescan failed:", err));
     } catch (err) {
       console.error("Delete failed:", err);
       alert("❌ Failed to delete file.");
@@ -55,7 +54,8 @@ const navigate = useNavigate();
   };
 
   if (status === "loading") return <p className="p-4">Loading…</p>;
-  if (status === "error") return <p className="p-4 text-red-400">File not found.</p>;
+  if (status === "error")
+    return <p className="p-4 text-red-400">File not found.</p>;
 
   return (
     <div className="flex flex-col h-screen">
