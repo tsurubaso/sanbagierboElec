@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { app, BrowserWindow, ipcMain, shell } from "electron"; //
+import { app, BrowserWindow, ipcMain, shell, dialog } from "electron"; //
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -218,16 +218,16 @@ ipcMain.handle("github-logout", () => {
 
 ipcMain.handle("github-profile", async () => {
   const token = store.get("github_token");
-   if (!token) {
+  if (!token) {
     throw new Error("Not authenticated");
   }
 
   try {
     const response = await fetch("https://api.github.com/user", {
       headers: {
-        "Authorization": `Bearer ${token}`,
-        "Accept": "application/vnd.github+json"
-      }
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+      },
     });
 
     if (!response.ok) {
@@ -241,9 +241,8 @@ ipcMain.handle("github-profile", async () => {
       name: profile.name,
       bio: profile.bio,
       avatar_url: profile.avatar_url,
-      html_url: profile.html_url
+      html_url: profile.html_url,
     };
-
   } catch (err) {
     console.error("GitHub profile error:", err);
     throw err;
@@ -336,3 +335,40 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   if (mainWindow === null) createWindow();
 });
+
+//create and save a book
+ipcMain.handle(
+  "create-or-update-book",
+  async (event, { fileName, content }) => {
+    try {
+      const booksDir = path.join(__dirname, "public", "books"); // ton submodule
+
+      // si le dossier n'existe pas
+      if (!fs.existsSync(booksDir)) {
+        dialog.showMessageBox({
+          type: "error",
+          title: "Dossier introuvable",
+          message: `Le dossier des livres n'existe pas :\n${booksDir}`,
+        });
+      }
+
+      const filePath = path.join(booksDir, `${fileName}.md`);
+
+      // Vérifier si le fichier existe déjà
+      if (fs.existsSync(filePath)) {
+        return {
+          ok: false,
+          error: `Le fichier '${fileName}.md' existe déjà.`,
+        };
+      }
+
+      await fs.promises.writeFile(filePath, content, "utf-8");
+
+      console.log("📘 Book saved:", filePath);
+      return { success: true, filePath };
+    } catch (err) {
+      console.error("❌ Error saving book:", err);
+      return { success: false, error: err.message };
+    }
+  }
+);

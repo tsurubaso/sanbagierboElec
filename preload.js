@@ -1,7 +1,7 @@
 // preload.js - Change to CommonJS
 const { contextBridge, ipcRenderer } = require("electron");
 
-console.log("preload loaded");
+console.log("preload loaded"); 
 
 contextBridge.exposeInMainWorld("electronAPI", {
   //  fonctions
@@ -26,7 +26,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   githubSync: () => ipcRenderer.invoke("github-sync"),
   onAuthSuccess: (callback) => {
     ipcRenderer.on("auth-success", callback);
-    return () => ipcRenderer.removeListener("auth-success", callback);
-  
-},
+    return () =>
+      ipcRenderer.removeListener("auth-success", callback);
+  },
+
+  // ✅ MISSING FUNCTION ADDED
+  createOrUpdateBook: (fileName, content) =>
+    ipcRenderer.invoke("create-or-update-book", { fileName, content }),
 });
