@@ -361,7 +361,7 @@ ipcMain.handle(
           error: `Le fichier '${fileName}.md' existe déjà.`,
         };
       }
-
+//ecrire le file
       await fs.promises.writeFile(filePath, content, "utf-8");
 
       console.log("📘 Book saved:", filePath);
@@ -372,3 +372,16 @@ ipcMain.handle(
     }
   }
 );
+//effacer
+ipcMain.handle("erase-markdown", async (event, book) => {
+  try {
+    const filePath = path.join(__dirname, "public", "books", `${book}.md`);
+    if (!fs.existsSync(filePath)) throw new Error("File not found");
+
+    await fs.promises.unlink(filePath);
+    return { ok: true };
+  } catch (err) {
+    console.error("Erase failed:", err);
+    return { ok: false, error: err.message };
+  }
+});

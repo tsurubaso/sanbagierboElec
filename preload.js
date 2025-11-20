@@ -30,7 +30,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.removeListener("auth-success", callback);
   },
 
-  // ✅ MISSING FUNCTION ADDED
+  // creer fichier
   createOrUpdateBook: (fileName, content) =>
     ipcRenderer.invoke("create-or-update-book", { fileName, content }),
+  // effacer fichier
+  eraseMarkdown: (book) => ipcRenderer.invoke("erase-markdown", book),
 });
