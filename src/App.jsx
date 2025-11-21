@@ -10,7 +10,7 @@ const Reader = lazy(() => import("@/pages/Reader"));
 const Editor = lazy(() => import("@/pages/Editor"));
 const GridPage = lazy(() => import("@/pages/GridPage"));
 const Creator = lazy(() => import("@/pages/Creator"));
-
+const Lecturer = lazy(() => import("@/pages/Lecturer"));
 
 function App() {
   return (
@@ -53,10 +53,15 @@ function App() {
                     element={<Editor />}
                   />
 
-                  {/* ✏️ Creator */}
+                  {/* 🌈 Creator */}
                   <Route
                     path="/:person/:statuslist/:link/creator"
                     element={<Creator />}
+                  />
+                  {/* 🎤 Lecturer*/}
+                  <Route
+                    path="/:person/:statuslist/:link/lecturer"
+                    element={<Lecturer />}
                   />
                 </Routes>
               </PersonLayout>

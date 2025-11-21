@@ -4,6 +4,7 @@ import DictionarySidebarSimple from "@/components/DicoSimplePourSidebare";
 import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
 import GithubSidebar from "@/components/GithubSidebar";
 
+
 export default function PersonLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -21,9 +22,10 @@ export default function PersonLayout({ children }) {
   const isReader = pathname.includes("/reader");
   const isEditor = pathname.includes("/editor");
   const isCreator = pathname.includes("/creator");
+  const isLecturer = pathname.includes("/lecturer");
 
   // Base path
-  const basePath = pathname.replace(/\/(reader|editor|creator)$/, "");
+  const basePath = pathname.replace(/\/(reader|editor|creator|lecturer)$/, "");
 
   //  Fonction pour rescanner
   const handleRescan = async () => {
@@ -41,6 +43,7 @@ export default function PersonLayout({ children }) {
     { href: `${basePath}/reader`, label: "📖 Reader" },
     { href: `${basePath}/editor`, label: "✏️ Editor" },
     { href: `${basePath}/creator`, label: "🖋️ Creator" },
+    { href: `${basePath}/lecturer`, label: "🎤 Lecturer" },
   ];
 
   // Boutons d'action
@@ -70,6 +73,19 @@ export default function PersonLayout({ children }) {
         navItemsTop={navItemsTop}
         actionButtons={actionButtons} // ✅ Passer les boutons
         rightSidebarContent={<DictionarySidebarSimple />}
+        showRightDefault={true}
+      >
+        {children}
+      </ClientWrapper>
+    );
+  }
+
+    if (isLecturer) {
+    return (
+      <ClientWrapper
+        navItemsTop={navItemsTop}
+        actionButtons={actionButtons} // ✅ Passer les boutons
+        rightSidebarContent={<div>Enregistrement</div>}
         showRightDefault={true}
       >
         {children}
