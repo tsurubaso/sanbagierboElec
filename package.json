@@ -6,10 +6,8 @@
   "type": "module",
   "scripts": {
     "vite": "vite",
-    "electron:dev": "npx electron . --dev",
-    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 --timeout 600000 && electron . --dev\"",
-    "dev2": "concurrently \"npm run vite\" \"npm run electron:dev\"",
-    "dev3": "concurrently -k \"npm run vite\" \"npm run electron:dev\"",
+    "dev:vite": "vite",
+    "dev:electron": "electron . --dev",
     "start": "electron .",
     "build": "vite build && electron-builder"
   },
@@ -33,7 +31,6 @@
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.22",
     "babel-plugin-react-compiler": "^19.1.0-rc.3",
-    "concurrently": "^9.2.1",
     "electron": "^39.2.0",
     "electron-builder": "^26.0.12",
     "eslint": "^9.36.0",
@@ -42,7 +39,6 @@
     "globals": "^16.4.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
-    "vite": "^7.1.7",
-    "wait-on": "^9.0.3"
+    "vite": "^7.1.7"
   }
 }

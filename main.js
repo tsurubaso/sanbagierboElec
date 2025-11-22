@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import Store from "electron-store";
 import { scanBooksFolder } from "./api/bookScanner.js";
 import simpleGit from "simple-git";
+import { execFile } from "child_process";
 
 const store = new Store();
 
@@ -14,6 +15,8 @@ const __dirname = path.dirname(__filename);
 
 //  DÉCLARER mainWindow EN GLOBAL
 let mainWindow = null;
+
+//function delay(ms) { return new Promise((resolve) => setTimeout(resolve, ms));}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -27,6 +30,7 @@ function createWindow() {
     },
   });
   console.log("BrowserWindow created");
+
   const isDev = process.argv.includes("--dev");
 
   if (isDev) {
@@ -43,11 +47,11 @@ function createWindow() {
 //  SCANNER LES LIVRES AU DÉMARRAGE
 async function scanAndStoreBooks() {
   const booksPath = path.join(__dirname, "public", "books");
-  console.log("📚 Scanning books folder:", booksPath);
+  console.log(" Scanning books folder:", booksPath);
 
   const books = await scanBooksFolder(booksPath);
 
-  console.log(`✅ Found ${books.length} books`);
+  console.log(` Found ${books.length} books`);
 
   // Stocker dans electron-store
   store.set("books", books);
@@ -55,6 +59,40 @@ async function scanAndStoreBooks() {
 
   return books;
 }
+
+//  Exécuter le Python
+function runPythonExe() {
+  return new Promise((resolve) => {
+    const pathToPythonExec = path.join(__dirname, "dist", "hello.exe");
+
+    console.log("🐍 Running Python exe:", pathToPythonExec);
+
+    // Vérifiez que le fichier existe
+    if (!fs.existsSync(pathToPythonExec)) {
+      console.warn("⚠️  Python exe not found:", pathToPythonExec);
+      resolve(); // Continuez quand même
+      return;
+    }
+
+    execFile(pathToPythonExec, { timeout: 10000 }, (error, stdout, stderr) => {
+      if (error) {
+        console.error("[PY ERROR]:", error.message);
+        resolve();
+        return;
+      }
+
+      if (stderr && stderr.trim() !== "") {
+        console.warn("[PY WARNING]:", stderr);
+      }
+
+      console.log("[PY STDOUT]:", stdout);
+      resolve();
+    });
+  });
+}
+// ========================
+// IPC HANDLERS
+// ========================
 
 //  IPC HANDLER : Récupérer les livres depuis le store
 ipcMain.handle("read-books-json", async () => {
@@ -314,26 +352,9 @@ ipcMain.handle("github-sync", async () => {
 
     return { success: true };
   } catch (err) {
-    console.error("Sync error:", err);
+    console.error("Sync error:", err); //  IPC HANDLER : Forcer un rescan
     return { success: false, error: err.message };
   }
-});
-
-app.whenReady().then(async () => {
-  console.log("Electron app ready");
-
-  //  SCANNER AU DÉMARRAGE
-  await scanAndStoreBooks();
-  createWindow();
-});
-
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") app.quit();
-});
-
-// ✅ Pour macOS - recréer la fenêtre si fermée
-app.on("activate", () => {
-  if (mainWindow === null) createWindow();
 });
 
 //create and save a book
@@ -361,11 +382,11 @@ ipcMain.handle(
           error: `Le fichier '${fileName}.md' existe déjà.`,
         };
       }
-//ecrire le file
+      //ecrire le file
       await fs.promises.writeFile(filePath, content, "utf-8");
 
       console.log("📘 Book saved:", filePath);
-      return { ok: true, fileName: filePath }; 
+      return { ok: true, fileName: filePath };
     } catch (err) {
       console.error("❌ Error saving book:", err);
       return { success: false, error: err.message };
@@ -384,4 +405,33 @@ ipcMain.handle("erase-markdown", async (event, book) => {
     console.error("Erase failed:", err);
     return { ok: false, error: err.message };
   }
+});
+//await delay(4000);
+
+// ========================
+// APP STARTUP
+// ========================
+
+app.whenReady().then(async () => {
+  console.log("Electron app ready");
+
+  //  SCANNER AU DÉMARRAGE
+  await scanAndStoreBooks();
+
+  // Créer la fenêtre
+  createWindow();
+
+  // Attendez le Python
+  await runPythonExe();
+
+    console.log(" App fully ready");
+});
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
+});
+
+//  Pour macOS - recréer la fenêtre si fermée
+app.on("activate", () => {
+  if (mainWindow === null) createWindow();
 });
