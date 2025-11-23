@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import Store from "electron-store";
 import { scanBooksFolder } from "./api/bookScanner.js";
 import simpleGit from "simple-git";
-import { execFile } from "child_process";
+import { spawn } from "child_process";
 
 const store = new Store();
 
@@ -61,35 +61,34 @@ async function scanAndStoreBooks() {
 }
 
 //  Exécuter le Python
-function runPythonExe() {
-  return new Promise((resolve) => {
-    const pathToPythonExec = path.join(__dirname, "dist", "hello.exe");
+ipcMain.handle("run-python-stt", () => {
+  const exe = path.join(__dirname, "dist", "speech_to_text8.exe");
 
-    console.log("🐍 Running Python exe:", pathToPythonExec);
+  console.log("🔍 Launching Python EXE:", exe);
 
-    // Vérifiez que le fichier existe
-    if (!fs.existsSync(pathToPythonExec)) {
-      console.warn("⚠️  Python exe not found:", pathToPythonExec);
-      resolve(); // Continuez quand même
-      return;
-    }
-
-    execFile(pathToPythonExec, { timeout: 10000 }, (error, stdout, stderr) => {
-      if (error) {
-        console.error("[PY ERROR]:", error.message);
-        resolve();
-        return;
-      }
-
-      if (stderr && stderr.trim() !== "") {
-        console.warn("[PY WARNING]:", stderr);
-      }
-
-      console.log("[PY STDOUT]:", stdout);
-      resolve();
-    });
+  if (!fs.existsSync(exe)) {
+    console.error("❌ Python EXE NOT FOUND:", exe);
+    return;
+  }
+ 
+  const child = spawn(exe, {
+    detached: true,
+   stdio: "pipe"// IMPORTANT → affiche la console Windows
   });
-}
+  child.stdout.on("data", data => {
+    console.log("[PY STDOUT]", data.toString());
+  });
+
+  child.stderr.on("data", data => {
+    console.log("[PY ERROR]", data.toString());
+  });
+
+  child.on("close", code => {
+    console.log("Python exited with code", code);
+  });
+  //child.unref(); // Laisse tourner même si Electron se ferme
+});
+
 // ========================
 // IPC HANDLERS
 // ========================
@@ -421,10 +420,6 @@ app.whenReady().then(async () => {
   // Créer la fenêtre
   createWindow();
 
-  // Attendez le Python
-  await runPythonExe();
-
-    console.log(" App fully ready");
 });
 
 app.on("window-all-closed", () => {

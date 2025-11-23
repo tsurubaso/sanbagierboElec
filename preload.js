@@ -35,4 +35,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("create-or-update-book", { fileName, content }),
   // effacer fichier
   eraseMarkdown: (book) => ipcRenderer.invoke("erase-markdown", book),
+  ///child process
+    runPythonSTT: () => ipcRenderer.invoke("run-python-stt")
 });

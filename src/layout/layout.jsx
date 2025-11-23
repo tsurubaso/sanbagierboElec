@@ -3,6 +3,7 @@ import ClientWrapper from "@/components/ClientWrapper";
 import DictionarySidebarSimple from "@/components/DicoSimplePourSidebare";
 import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
 import GithubSidebar from "@/components/GithubSidebar";
+import SpeechToTextLauncher from  "@/components/SpeechToTextLauncher";
 
 
 export default function PersonLayout({ children }) {
@@ -85,7 +86,7 @@ export default function PersonLayout({ children }) {
       <ClientWrapper
         navItemsTop={navItemsTop}
         actionButtons={actionButtons} // ✅ Passer les boutons
-        rightSidebarContent={<div>Enregistrement</div>}
+        rightSidebarContent={<div><SpeechToTextLauncher/></div>}
         showRightDefault={true}
       >
         {children}
