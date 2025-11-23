@@ -61,8 +61,8 @@ async function scanAndStoreBooks() {
 }
 
 //  Exécuter le Python
-ipcMain.handle("run-python-stt", () => {
-  const exe = path.join(__dirname, "dist", "speech_to_text8.exe");
+ipcMain.handle("run-python-stt", (event, config) => {
+  const exe = path.join(__dirname, "dist", "speech_to_text8Elec.exe");
 
   console.log("🔍 Launching Python EXE:", exe);
 
@@ -71,20 +71,23 @@ ipcMain.handle("run-python-stt", () => {
     return;
   }
  
-  const child = spawn(exe, {
-    detached: true,
-   stdio: "pipe"// IMPORTANT → affiche la console Windows
+  const child = spawn(exe, [JSON.stringify(config)], {
+    detached: false,
+    stdio: ["ignore", "pipe", "pipe"]
   });
   child.stdout.on("data", data => {
     console.log("[PY STDOUT]", data.toString());
+    event.sender.send("python-output", data.toString());
   });
 
   child.stderr.on("data", data => {
     console.log("[PY ERROR]", data.toString());
+    event.sender.send("python-error", data.toString());
   });
 
   child.on("close", code => {
     console.log("Python exited with code", code);
+    event.sender.send("python-exit", code);
   });
   //child.unref(); // Laisse tourner même si Electron se ferme
 });

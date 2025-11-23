@@ -1,7 +1,7 @@
 // preload.js - Change to CommonJS
 const { contextBridge, ipcRenderer } = require("electron");
 
-console.log("preload loaded"); 
+console.log("preload loaded");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   //  fonctions
@@ -26,8 +26,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   githubSync: () => ipcRenderer.invoke("github-sync"),
   onAuthSuccess: (callback) => {
     ipcRenderer.on("auth-success", callback);
-    return () =>
-      ipcRenderer.removeListener("auth-success", callback);
+    return () => ipcRenderer.removeListener("auth-success", callback);
   },
 
   // creer fichier
@@ -35,6 +34,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("create-or-update-book", { fileName, content }),
   // effacer fichier
   eraseMarkdown: (book) => ipcRenderer.invoke("erase-markdown", book),
-  ///child process
-    runPythonSTT: () => ipcRenderer.invoke("run-python-stt")
+  ///Python child process
+  runPythonSTT: (config) => ipcRenderer.invoke("run-python-stt", config),
+  onPythonOutput: (callback) =>
+    ipcRenderer.on("python-output", (_, data) => callback(data)),
+  onPythonError: (callback) =>
+    ipcRenderer.on("python-error", (_, data) => callback(data)),
+  onPythonExit: (callback) =>
+    ipcRenderer.on("python-exit", (_, code) => callback(code)),
 });

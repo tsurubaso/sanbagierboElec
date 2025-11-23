@@ -1,8 +1,14 @@
 import React from "react";
 
 export default function SpeechToTextLauncher() {
+
+    const config = {
+    input_path: "C:\\Users\\space\\OneDrive\\Desktop\\Zara\\enregistrement\\test.wav",
+    language: "FR-fr",
+    output_path: "C:\\Users\\space\\OneDrive\\Desktop\\Zara\\enregistrement\\test.md"
+  };
   const runSpeechToText = () => {
-    window.electronAPI.runPythonSTT();
+    window.electronAPI.runPythonSTT(config);
   };
 
   return (
