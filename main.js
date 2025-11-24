@@ -447,3 +447,19 @@ app.on("window-all-closed", () => {
 app.on("activate", () => {
   if (mainWindow === null) createWindow();
 });
+
+ipcMain.handle("open-dialog", async () => {
+  const win = BrowserWindow.getFocusedWindow();
+
+  const result = await dialog.showOpenDialog(win, {
+    title: "Choisir un fichier audio",
+    filters: [
+      { name: "Audio", extensions: ["wav", "mp3", "m4a", "ogg", "flac"] },
+    ],
+    properties: ["openFile"],
+  });
+
+  if (result.canceled) return null;
+
+  return result.filePaths;
+});
