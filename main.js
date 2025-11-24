@@ -13,6 +13,13 @@ const store = new Store();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const OUTPUT_DIR = path.join(__dirname, "output");
+
+// Créer le dossier si nécessaire
+if (!fs.existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
+
 //  DÉCLARER mainWindow EN GLOBAL
 let mainWindow = null;
 
@@ -70,26 +77,34 @@ ipcMain.handle("run-python-stt", (event, config) => {
     console.error("❌ Python EXE NOT FOUND:", exe);
     return;
   }
- 
+
+  // Ajouter automatiquement un fichier de sortie
+  const outputFileName = "transcription_" + Date.now() + ".md";
+  config.output_path = path.join(OUTPUT_DIR, outputFileName);
+
+  console.log("📄 Output file:", config.output_path);
+
   const child = spawn(exe, [JSON.stringify(config)], {
     detached: false,
-    stdio: ["ignore", "pipe", "pipe"]
+    stdio: ["ignore", "pipe", "pipe"],
   });
-  child.stdout.on("data", data => {
+  child.stdout.on("data", (data) => {
     console.log("[PY STDOUT]", data.toString());
     event.sender.send("python-output", data.toString());
   });
 
-  child.stderr.on("data", data => {
+  child.stderr.on("data", (data) => {
     console.log("[PY ERROR]", data.toString());
     event.sender.send("python-error", data.toString());
   });
 
-  child.on("close", code => {
+  child.on("close", (code) => {
     console.log("Python exited with code", code);
-    event.sender.send("python-exit", code);
+    event.sender.send("python-exit", {
+      code,
+      output_path: config.output_path,
+    });
   });
-  //child.unref(); // Laisse tourner même si Electron se ferme
 });
 
 // ========================
@@ -422,7 +437,6 @@ app.whenReady().then(async () => {
 
   // Créer la fenêtre
   createWindow();
-
 });
 
 app.on("window-all-closed", () => {

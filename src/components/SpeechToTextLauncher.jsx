@@ -1,15 +1,24 @@
 import React from "react";
 
 export default function SpeechToTextLauncher() {
+const runSpeechToText = async () => {
+  const filePaths = await window.electronAPI.showOpenDialog({
+    filters: [
+      { name: "Audio", extensions: ["wav", "mp3", "m4a", "ogg", "flac"] },
+    ],
+    properties: ["openFile"],
+  });
 
-    const config = {
-    input_path: "C:\\Users\\space\\OneDrive\\Desktop\\Zara\\enregistrement\\test.wav",
-    language: "FR-fr",
-    output_path: "C:\\Users\\space\\OneDrive\\Desktop\\Zara\\enregistrement\\test.md"
+  if (!filePaths || filePaths.length === 0) return;
+
+  const config = {
+    input_path: filePaths[0],
+    language: "fr-FR",
+    // PAS d’output ici → Electron s’en occupe
   };
-  const runSpeechToText = () => {
-    window.electronAPI.runPythonSTT(config);
-  };
+
+  window.electronAPI.runPythonSTT(config);
+};
 
   return (
     <div className="p-3 flex flex-col items-center">

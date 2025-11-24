@@ -42,4 +42,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("python-error", (_, data) => callback(data)),
   onPythonExit: (callback) =>
     ipcRenderer.on("python-exit", (_, code) => callback(code)),
+  showOpenDialog: () => ipcRenderer.invoke("open-dialog"),
+
 });
