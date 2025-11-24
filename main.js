@@ -463,3 +463,26 @@ ipcMain.handle("open-dialog", async () => {
 
   return result.filePaths;
 });
+
+ipcMain.handle("select-transcription", async () => {
+  const win = BrowserWindow.getFocusedWindow();
+
+  const result = await dialog.showOpenDialog(win, {
+    title: "Choisir une transcription",
+    defaultPath: OUTPUT_DIR,
+    filters: [{ name: "Markdown", extensions: ["md"] }],
+    properties: ["openFile"]
+  });
+
+  if (result.canceled) return null;
+  return result.filePaths[0];
+});
+
+ipcMain.handle("read-file", async (_, filePath) => {
+  try {
+    const content = fs.readFileSync(filePath, "utf-8");
+    return { ok: true, content };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});

@@ -17,7 +17,7 @@ const runSpeechToText = async () => {
     // PAS d’output ici → Electron s’en occupe
   };
 
-  window.electronAPI.runPythonSTT(config);
+window.electronAPI.runPythonSTT(config);
 };
 
   return (

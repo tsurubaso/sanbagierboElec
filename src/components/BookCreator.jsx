@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 
 export default function BookCreator() {
@@ -18,36 +18,46 @@ timelineEnd:
 # Titre
 `;
 
-  const [code, setCode] = useState(initialTemplate); // prefill editor
+  const [code, setCode] = useState(initialTemplate);
+
+  // Listen to transcription-imported events
+  useEffect(() => {
+    const handler = (e) => {
+      const text = e.detail.content;
+      setCode((prev) => prev + "\n\n" + text);
+    };
+
+    window.addEventListener("transcription-imported", handler);
+    return () => window.removeEventListener("transcription-imported", handler);
+  }, []);
+
+
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    if (!code.trim()) return; // nothing to save
+    if (!code.trim()) return;
     setSaving(true);
 
-  try {
-    // 1️⃣ Extraire link:
-    const match = code.match(/link:\s*([^\s]+)/);
-    if (!match) {
-      alert("❌ Le champ 'link:' est manquant !");
-      return;
-    }
+    try {
+      const match = code.match(/link:\s*([^\s]+)/);
 
-    // 2️⃣ Nettoyer pour nom de fichier
-    const fileName = match[1].trim().replace(/[^a-zA-Z0-9-_]/g, "");
+      if (!match) {
+        alert("❌ Le champ 'link:' est manquant !");
+        setSaving(false); // IMPORTANT fix
+        return;
+      }
 
-    // 3️⃣ Appeler l'API Electron
-    const result = await window.electronAPI.createOrUpdateBook(fileName, code);
+      const fileName = match[1].trim().replace(/[^a-zA-Z0-9-_]/g, "");
 
-    // 4️⃣ Afficher le résultat
-    if (result.ok) {
-      alert(`✅ Saved as ${result.fileName}.md`);
-      setCode(initialTemplate); // reset editor
-    } else {
-      alert(`❌ Failed: ${result.error}`);
-    }
+      const result = await window.electronAPI.createOrUpdateBook(fileName, code);
 
-  }  catch (err) {
+      if (result.ok) {
+        alert(`✅ Saved as ${result.fileName}.md`);
+        setCode(initialTemplate);
+      } else {
+        alert(`❌ Failed: ${result.error}`);
+      }
+    } catch (err) {
       console.error("Error saving book:", err);
       alert("❌ Failed to save book");
     } finally {
@@ -61,10 +71,9 @@ timelineEnd:
         <Editor
           height="100%"
           defaultLanguage="markdown"
-          defaultValue={code}
           value={code}
-          onChange={(value) => setCode(value)}
-          theme="vs-light" // white background
+          onChange={(value) => value !== undefined && setCode(value)}
+          theme="vs-light"
           options={{
             minimap: { enabled: false },
             fontSize: 16,

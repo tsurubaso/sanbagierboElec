@@ -43,5 +43,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onPythonExit: (callback) =>
     ipcRenderer.on("python-exit", (_, code) => callback(code)),
   showOpenDialog: () => ipcRenderer.invoke("open-dialog"),
-
+  selectTranscriptionFile: () => ipcRenderer.invoke("select-transcription"),
+  readFile: (path) => ipcRenderer.invoke("read-file", path),
 });
