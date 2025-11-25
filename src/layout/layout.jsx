@@ -5,7 +5,7 @@ import DictionarySidebarFull from "@/components/DicoCompletPourSidebare";
 import GithubSidebar from "@/components/GithubSidebar";
 import SpeechToTextLauncher from  "@/components/SpeechToTextLauncher";
 import ImportTranscriptionButton from "@/components/ImportTranscriptionButton";
-
+import AudioPlayerWaveform from "@/components/AudioPlayerWaveform";
 
 export default function PersonLayout({ children }) {
   const location = useLocation();
@@ -90,6 +90,7 @@ export default function PersonLayout({ children }) {
         rightSidebarContent={<div><SpeechToTextLauncher/><ImportTranscriptionButton/></div>}
         showRightDefault={true}
       >
+    <AudioPlayerWaveform/>
         {children}
       </ClientWrapper>
     );

@@ -471,7 +471,7 @@ ipcMain.handle("select-transcription", async () => {
     title: "Choisir une transcription",
     defaultPath: OUTPUT_DIR,
     filters: [{ name: "Markdown", extensions: ["md"] }],
-    properties: ["openFile"]
+    properties: ["openFile"],
   });
 
   if (result.canceled) return null;
